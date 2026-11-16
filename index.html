@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دليل الشبكة الطبية المعتمدة</title>
+    <title>دليل الشبكة الطبية - الشركة العالمية للتأمين الصحي</title>
     <!-- خط تجوال العربي الاحترافي -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <!-- مكتبة SheetJS لقراءة ملفات الإكسل -->
@@ -42,11 +42,11 @@
             min-height: 100vh;
         }
 
-        /* الترويسة الفاخرة ذات التدرج اللوني الجذاب */
+        /* الترويسة الفاخرة */
         header {
             background: linear-gradient(135deg, #022c22 0%, #065f46 50%, #047857 100%);
             color: white;
-            padding: 3.5rem 1.5rem 6rem;
+            padding: 3rem 1.5rem 5.5rem;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -64,19 +64,56 @@
             pointer-events: none;
         }
 
+        /* تنسيق قسم الشعار والهوية */
+        .brand-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 1.25rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 0.75rem 1.5rem;
+            border-radius: 20px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            text-align: right;
+        }
+
+        .brand-logo {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
+            background: #ffffff;
+            padding: 4px;
+            border-radius: 10px;
+        }
+
+        .brand-text h2 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .brand-text span {
+            font-size: 0.8rem;
+            opacity: 0.85;
+            letter-spacing: 0.5px;
+        }
+
         header h1 {
-            font-size: 2.75rem;
+            font-size: 2.5rem;
             font-weight: 900;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
             letter-spacing: -0.5px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         header p {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             opacity: 0.9;
             max-width: 650px;
-            margin: 0 auto 2rem;
+            margin: 0 auto 1.75rem;
         }
 
         .header-actions {
@@ -93,23 +130,23 @@
             background: rgba(255, 255, 255, 0.12);
             border: 1px solid rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(12px);
-            padding: 0.6rem 1.5rem;
+            padding: 0.5rem 1.25rem;
             border-radius: 50px;
             color: white;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 0.6rem;
+            gap: 0.5rem;
             transition: all 0.3s ease;
         }
 
         .action-chip:hover {
             background: white;
             color: var(--primary-dark);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
         }
 
         .container {
@@ -118,7 +155,7 @@
             padding: 0 1.5rem;
         }
 
-        /* لوحة البحث والفلترة العائمة المميزة */
+        /* لوحة البحث والفلترة العائمة */
         .search-panel {
             background: var(--card-bg);
             border-radius: 24px;
@@ -167,7 +204,7 @@
             box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.12);
         }
 
-        /* شريط النتائج والإحصائيات الحديث */
+        /* شريط النتائج والإحصائيات */
         .results-bar {
             display: flex;
             justify-content: space-between;
@@ -216,7 +253,7 @@
             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
         }
 
-        /* شبكة البطاقات العصرية */
+        /* شبكة البطاقات */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -396,7 +433,7 @@
                 margin-top: -2rem;
             }
             header h1 {
-                font-size: 2.1rem;
+                font-size: 2rem;
             }
         }
     </style>
@@ -405,15 +442,24 @@
 
     <header>
         <div class="container">
+            <!-- شعار وعنوان الشركة -->
+            <div class="brand-container">
+                <img src="logo.jpg" alt="شعار الشركة العالمية للتأمين الصحي" class="brand-logo" onerror="this.style.display='none'">
+                <div class="brand-text">
+                    <h2>الشركة العالمية للتأمين الصحي</h2>
+                    <span>Global Health Insurance</span>
+                </div>
+            </div>
+
             <h1>دليل الشبكة الطبية المعتمدة</h1>
             <p>منصة رقمية متطورة لاستعراض والبحث في شبكة الرعاية الصحية والجهات الطبية المعتمدة</p>
             
             <div class="header-actions">
                 <button class="action-chip" onclick="loadExcelFile()">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    تحديث البيانات من GitHub
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    تحديث البيانات
                 </button>
-                <span id="syncStatus" style="font-size: 0.9rem; opacity: 0.9; background: rgba(255,255,255,0.1); padding: 0.4rem 1rem; border-radius: 30px;">جاري الاتصال...</span>
+                <span id="syncStatus" style="font-size: 0.85rem; opacity: 0.9;">متصل بملف البيانات</span>
             </div>
         </div>
     </header>
@@ -459,8 +505,8 @@
         <!-- شبكة عرض البطاقات -->
         <section class="grid" id="cardsGrid">
             <div class="state-box">
-                <h3>جاري جلب البيانات...</h3>
-                <p>يتم تحميل ملف البيانات من المستودع على GitHub.</p>
+                <h3>جاري تحميل البيانات...</h3>
+                <p>يرجى الانتظار لحظات ريثما يتم جلب بيانات الشبكة الطبية.</p>
             </div>
         </section>
     </main>
@@ -468,9 +514,9 @@
     <!-- قالب تقرير الـ PDF المنسق -->
     <div id="pdfExportTemplate">
         <div style="text-align: center; border-bottom: 3px solid #059669; padding-bottom: 15px; margin-bottom: 20px;">
-            <h2 style="color: #047857; font-size: 24px; margin-bottom: 5px;">دليل الشبكة الطبية المعتمدة</h2>
-            <p style="color: #64748b; font-size: 13px;">تقرير رسمي ببيانات الجهات والمستشفيات الطبية المتاحة</p>
-            <p style="color: #94a3b8; font-size: 11px; margin-top: 5px;" id="pdfExportDate"></p>
+            <h2 style="color: #047857; font-size: 22px; margin-bottom: 3px;">الشركة العالمية للتأمين الصحي</h2>
+            <p style="color: #059669; font-size: 14px; font-weight: bold; margin-bottom: 5px;">دليل الشبكة الطبية المعتمدة</p>
+            <p style="color: #64748b; font-size: 11px; margin-top: 5px;" id="pdfExportDate"></p>
         </div>
         <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;">
             <thead>
@@ -490,10 +536,7 @@
     </div>
 
     <script>
-        // =========================================================================
-        // اسم ملف الإكسل الموجود في نفس المجلد على GitHub
         const EXCEL_FILE_PATH = "data.xlsx";
-        // =========================================================================
 
         let allProviders = [];
         let currentFilteredProviders = [];
@@ -522,17 +565,14 @@
             };
         }
 
-        // جلب الملف تلقائياً من مسار المشروع على GitHub
         function loadExcelFile() {
             syncStatus.innerHTML = "⏳ جاري التحديث...";
-            
-            // إضافة معامل تكنولوجي لمنع تخزين الكاش القديم
             const fileUrl = EXCEL_FILE_PATH + "?t=" + new Date().getTime();
 
             fetch(fileUrl)
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error("تعذر الوصول إلى ملف الإكسل في المستودع.");
+                        throw new Error("تعذر الوصول إلى ملف الإكسل.");
                     }
                     return response.arrayBuffer();
                 })
@@ -547,17 +587,17 @@
                         .map(normalizeRow)
                         .filter(item => item.name && item.name.toString().trim() !== '');
 
-                    syncStatus.innerHTML = "🟢 متصل بملف GitHub بنجاح";
+                    syncStatus.innerHTML = "🟢 متزامن بنجاح";
                     populateFilters(allProviders);
                     filterData();
                 })
                 .catch(error => {
                     console.error(error);
-                    syncStatus.innerHTML = "🔴 خطأ في جلب الملف";
+                    syncStatus.innerHTML = "🔴 خطأ في التحميل";
                     cardsGrid.innerHTML = `
                         <div class="state-box">
                             <h3 style="color:#dc2626;">تعذر العثور على ملف الإكسل</h3>
-                            <p>تأكد من أن ملف الإكسل مسجّل باسم <strong>"${EXCEL_FILE_PATH}"</strong> ومرفوع في **نفس المجلد** داخل مستودع GitHub الخاص بك.</p>
+                            <p>تأكد من أن ملف الإكسل باسم <strong>"${EXCEL_FILE_PATH}"</strong> ومرفوع في نفس المجلد مع هذا الملف على GitHub.</p>
                         </div>
                     `;
                 });
@@ -683,7 +723,7 @@
 
             const opt = {
                 margin:       10,
-                filename:     'دليل_الشبكة_الطبية.pdf',
+                filename:     'دليل_الشبكة_الطبية_الشركة_العالمية.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
@@ -699,7 +739,6 @@
         sectionFilter.addEventListener('change', filterData);
         categoryFilter.addEventListener('change', filterData);
 
-        // تحميل الملف تلقائياً عند فتح الصفحة من الإنترنت
         loadExcelFile();
     </script>
 </body>
