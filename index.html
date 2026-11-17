@@ -432,13 +432,13 @@
                 row[key.trim()] = rawRow[key];
             }
             return {
-                name: row['اسم الشبكه'] || row['اسم الشبكة'] || row['الاسم'] || row['name'] || '',
-                address: row['العنوان'] || row['address'] || '',
-                phone: String(row['الهاتف'] || row['رقم الهاتف'] || row['phone'] || ''),
-                city: row['المحافظة'] || row['المدينة'] || row['city'] || '',
-                section: row['القسم'] || row['section'] || '',
-                category: row['التصنيف'] || row['category'] || '',
-                map_url: row['الخريطة'] || row['map_url'] || ''
+                name: (row['اسم الشبكه'] !== undefined && row['اسم الشبكه'] !== null) ? String(row['اسم الشبكه']).trim() : '',
+                address: (row['العنوان'] !== undefined && row['العنوان'] !== null) ? String(row['العنوان']).trim() : '',
+                phone: (row['الهاتف'] !== undefined && row['الهاتف'] !== null) ? String(row['الهاتف']).trim() : '',
+                city: (row['المحافظة'] !== undefined && row['المحافظة'] !== null) ? String(row['المحافظة']).trim() : '',
+                section: (row['القسم'] !== undefined && row['القسم'] !== null) ? String(row['القسم']).trim() : '',
+                category: (row['التصنيف'] !== undefined && row['التصنيف'] !== null) ? String(row['التصنيف']).trim() : '',
+                map_url: (row['الخريطة'] !== undefined && row['الخريطة'] !== null) ? String(row['الخريطة']).trim() : ''
             };
         }
 
@@ -460,12 +460,12 @@
 
                     allProviders = jsonData
                         .map(normalizeRow)
-                        .filter(item => item.name && item.name.toString().trim() !== '');
+                        .filter(item => item.name !== '');
 
-                    syncStatus.innerHTML = "🟢 متزامن بنجاح";
+                    syncStatus.innerHTML = "🟢 متزامن بنجاح (" + allProviders.length + " جهة)";
                     populateFilters(allProviders);
                     
-                    // تهيئة النتائج المفلترة لتشمل كل البيانات منذ البداية
+                    // إسناد البيانات الكاملة للنتائج المفلترة لضمان عمل PDF فور فتح الصفحة
                     currentFilteredProviders = allProviders;
                     renderCards(allProviders);
                 })
@@ -486,9 +486,9 @@
             sectionFilter.innerHTML = '<option value="">جميع الأقسام</option>';
             categoryFilter.innerHTML = '<option value="">جميع التصنيفات</option>';
 
-            const cities = [...new Set(data.map(item => item.city?.toString().trim()).filter(Boolean))].sort();
-            const sections = [...new Set(data.map(item => item.section?.toString().trim()).filter(Boolean))].sort();
-            const categories = [...new Set(data.map(item => item.category?.toString().trim()).filter(Boolean))].sort();
+            const cities = [...new Set(data.map(item => item.city).filter(Boolean))].sort();
+            const sections = [...new Set(data.map(item => item.section).filter(Boolean))].sort();
+            const categories = [...new Set(data.map(item => item.category).filter(Boolean))].sort();
 
             cities.forEach(c => cityFilter.add(new Option(c, c)));
             sections.forEach(s => sectionFilter.add(new Option(s, s)));
@@ -508,14 +508,17 @@
                 return;
             }
 
-            cardsGrid.innerHTML = data.map(item => {
+            // عرض أول 50 بطاقة فقط في الواجهة لضمان سرعة تصفح فائقة، بينما زر PDF سيصدر الكل
+            const displayData = data.slice(0, 50);
+
+            cardsGrid.innerHTML = displayData.map(item => {
                 const name = item.name || 'غير محدد';
                 const section = item.section || 'جهة طبية';
                 const category = item.category || '';
                 const city = item.city || '';
                 const address = item.address || 'العنوان غير متوفر';
-                const phone = item.phone ? item.phone.toString().trim() : '';
-                const mapUrl = item.map_url && item.map_url.trim() !== '' 
+                const phone = item.phone || '';
+                const mapUrl = item.map_url !== '' 
                     ? item.map_url 
                     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + ' ' + city)}`;
 
@@ -562,13 +565,13 @@
 
             currentFilteredProviders = allProviders.filter(item => {
                 const matchText = !query || 
-                    (item.name && item.name.toLowerCase().includes(query)) ||
-                    (item.address && item.address.toLowerCase().includes(query)) ||
-                    (item.phone && item.phone.includes(query));
+                    item.name.toLowerCase().includes(query) ||
+                    item.address.toLowerCase().includes(query) ||
+                    item.phone.includes(query);
 
-                const matchCity = !selectedCity || (item.city && item.city.toString().trim() === selectedCity);
-                const matchSection = !selectedSection || (item.section && item.section.toString().trim() === selectedSection);
-                const matchCat = !selectedCat || (item.category && item.category.toString().trim() === selectedCat);
+                const matchCity = !selectedCity || item.city === selectedCity;
+                const matchSection = !selectedSection || item.section === selectedSection;
+                const matchCat = !selectedCat || item.category === selectedCat;
 
                 return matchText && matchCity && matchSection && matchCat;
             });
@@ -576,7 +579,6 @@
             renderCards(currentFilteredProviders);
         }
 
-        // دالة توليد وتنزيل ملف PDF المخصصة للبيانات الكبيرة الضخمة
         function exportToPDF() {
             const dataToExport = (currentFilteredProviders && currentFilteredProviders.length > 0) 
                 ? currentFilteredProviders 
@@ -588,42 +590,38 @@
             }
 
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4'); // جدول عريض (Landscape)
+            const doc = new jsPDF('l', 'mm', 'a4');
 
-            // عنوان التقرير
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(16);
+            doc.setFontSize(15);
             doc.setTextColor(4, 120, 87);
             doc.text("Global Health Insurance - Medical Network Guide", 14, 15);
 
-            doc.setFontSize(11);
+            doc.setFontSize(10);
             doc.setTextColor(100, 116, 139);
-            doc.text("الشركة العالمية للتأمين الصحي - دليل الشبكة الطبية المعتمدة", 14, 22);
-            doc.text("تاريخ التقرير: " + new Date().toLocaleDateString('ar-SA'), 14, 28);
+            doc.text("الشركة العالمية للتأمين الصحي - دليل الشبكة الطبية المعتمدة", 14, 21);
+            doc.text("تاريخ التقرير: " + new Date().toLocaleDateString('ar-SA'), 14, 27);
 
-            // إعداد أعمدة الجدول وبياناته
             const tableHeaders = [["اسم الجهة الطبية", "القسم", "المحافظة", "العنوان", "الهاتف", "التصنيف"]];
             const tableData = dataToExport.map(item => [
-                item.name || '',
-                item.section || '',
-                item.city || '',
-                item.address || '',
-                item.phone || '',
-                item.category || ''
+                item.name,
+                item.section,
+                item.city,
+                item.address,
+                item.phone,
+                item.category
             ]);
 
-            // رسم الجدول باحترافية وسرعة فائقة
             doc.autoTable({
                 head: tableHeaders,
                 body: tableData,
-                startY: 34,
-                styles: { font: "helvetica", fontSize: 9, cellPadding: 4, halign: 'right' },
+                startY: 32,
+                styles: { font: "helvetica", fontSize: 8, cellPadding: 3, halign: 'right' },
                 headStyles: { fillColor: [4, 120, 87], textColor: [255, 255, 255], fontStyle: 'bold' },
                 alternateRowStyles: { fillColor: [241, 245, 249] },
-                margin: { top: 34, right: 14, bottom: 14, left: 14 }
+                margin: { top: 32, right: 14, bottom: 14, left: 14 }
             });
 
-            // حفظ الملف وتنزيله فوراً
             doc.save('دليل_الشبكة_الطبية_الشركة_العالمية.pdf');
         }
 
