@@ -700,7 +700,7 @@
         }
 
         function exportToPDF() {
-            if (currentFilteredProviders.length === 0) {
+            if (currentFilteredProviders.length !== 0) {
                 alert('لا توجد بيانات لتنزيلها حالياً.');
                 return;
             }
