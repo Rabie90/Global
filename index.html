@@ -8,8 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <!-- مكتبة SheetJS لقراءة ملفات الإكسل -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- مكتبة html2pdf لتصدير الملفات بصيغة PDF مع دعم كامل للغة العربية -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
             --primary: #090979;
@@ -328,17 +326,6 @@
             color: var(--text-muted);
         }
 
-        /* تنسيق جدول الـ PDF المخفي لدعم اللغة العربية والخطوط باحترافية */
-        #pdfExportTemplate {
-            display: none;
-            direction: rtl;
-            font-family: 'Tajawal', sans-serif;
-            background: white;
-            padding: 20px;
-            color: #0f172a;
-            width: 1100px;
-        }
-
         @media (max-width: 1024px) {
             .search-panel {
                 grid-template-columns: 1fr 1fr;
@@ -420,30 +407,6 @@
             </div>
         </section>
     </main>
-
-    <!-- قالب الـ PDF المخصص لعرض الجدول العربي بالكامل ودعمه عبر خط Tajawal -->
-    <div id="pdfExportTemplate">
-        <div style="text-align: center; border-bottom: 3px solid #047857; padding-bottom: 15px; margin-bottom: 20px;">
-            <h2 style="color: #047857; font-size: 24px; margin-bottom: 5px;">الشركة العالمية للتأمين الصحي</h2>
-            <p style="color: #059669; font-size: 16px; font-weight: bold;">دليل الشبكة الطبية المعتمدة</p>
-            <p style="color: #64748b; font-size: 12px; margin-top: 5px;" id="pdfExportDate"></p>
-        </div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: right;">
-            <thead>
-                <tr style="background-color: #047857; color: white;">
-                    <th style="padding: 10px; border: 1px solid #cbd5e1;">اسم الجهة الطبية</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1;">القسم</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1;">المحافظة</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1;">العنوان</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1;">الهاتف</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1;">التصنيف</th>
-                </tr>
-            </thead>
-            <tbody id="pdfTableBody">
-                <!-- يتم تعبئتها ديناميكياً -->
-            </tbody>
-        </table>
-    </div>
 
     <script>
         const EXCEL_FILE_PATH = "data.xlsx";
@@ -610,7 +573,7 @@
             renderCards(currentFilteredProviders);
         }
 
-        // دالة تصدير ملف الـ PDF مع دعم كامل للغة العربية والخط العربي عبر html2pdf
+        // الطريقة الأكثر أماناً وضماناً 100% للبيانات الضخمة: الطباعة الذكية وتحويلها إلى PDF عبر المتصفح
         function exportToPDF() {
             const dataToExport = (currentFilteredProviders && currentFilteredProviders.length > 0) 
                 ? currentFilteredProviders 
@@ -621,39 +584,73 @@
                 return;
             }
 
-            const tbody = document.getElementById('pdfTableBody');
-            tbody.innerHTML = dataToExport.map(item => `
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold;">${item.name || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.section || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.city || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.address || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1;" dir="ltr">${item.phone || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.category || ''}</td>
-                </tr>
-            `).join('');
+            // فتح نافذة طباعة نظيفة ومنسقة بجدول كامل للبيانات
+            const printWindow = window.open('', '_blank');
+            
+            let htmlContent = `
+                <!DOCTYPE html>
+                <html lang="ar" dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>دليل الشبكة الطبية - الشركة العالمية للتأمين الصحي</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+                    <style>
+                        body { font-family: 'Tajawal', sans-serif; direction: rtl; padding: 20px; color: #1e293b; }
+                        .header { text-align: center; border-bottom: 2px solid #047857; padding-bottom: 15px; margin-bottom: 20px; }
+                        .header h2 { color: #047857; margin: 0 0 5px 0; font-size: 22px; }
+                        .header p { color: #64748b; margin: 0; font-size: 13px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+                        th, td { border: 1px solid #cbd5e1; padding: 8px; text-align: right; }
+                        th { background-color: #047857; color: white; font-weight: bold; }
+                        tr:nth-child(even) { background-color: #f8fafc; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h2>الشركة العالمية للتأمين الصحي - دليل الشبكة الطبية المعتمدة</h2>
+                        <p>إجمالي الجهات الطبية المدرجة: ${dataToExport.length} | تاريخ التقرير: ${new Date().toLocaleDateString('ar-SA')}</p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>اسم الجهة الطبية</th>
+                                <th>القسم</th>
+                                <th>المحافظة</th>
+                                <th>العنوان</th>
+                                <th>الهاتف</th>
+                                <th>التصنيف</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
 
-            document.getElementById('pdfExportDate').textContent = 'تاريخ التقرير: ' + new Date().toLocaleDateString('ar-SA');
-
-            const element = document.getElementById('pdfExportTemplate');
-            element.style.display = 'block';
-
-            const opt = {
-                margin:       10,
-                filename:     'دليل_الشبكة_الطبية_الشركة_العالمية.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, logging: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-            };
-
-            // تشغيل مكتبة التحويل مع إخفاء القالب عند الانتهاء
-            html2pdf().from(element).set(opt).save().then(() => {
-                element.style.display = 'none';
-            }).catch(err => {
-                console.error(err);
-                element.style.display = 'none';
-                alert('حدث خطأ أثناء تصدير الملف.');
+            dataToExport.forEach(item => {
+                htmlContent += `
+                    <tr>
+                        <td><b>${item.name || ''}</b></td>
+                        <td>${item.section || ''}</td>
+                        <td>${item.city || ''}</td>
+                        <td>${item.address || ''}</td>
+                        <td dir="ltr" style="text-align: right;">${item.phone || ''}</td>
+                        <td>${item.category || ''}</td>
+                    </tr>
+                `;
             });
+
+            htmlContent += `
+                        </tbody>
+                    </table>
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
         }
 
         searchInput.addEventListener('input', filterData);
