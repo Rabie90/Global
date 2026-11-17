@@ -701,13 +701,18 @@
         }
 
         function exportToPDF() {
-            if (currentFilteredProviders.length === 0) {
-                alert('لا توجد بيانات لتنزيلها حالياً.');
+            // إذا لم يتم فلترة البيانات أو كانت النتائج الحالية فارغة، قم بتصدير كل البيانات المتاحة
+            const dataToExport = (currentFilteredProviders && currentFilteredProviders.length > 0) 
+                ? currentFilteredProviders 
+                : allProviders;
+
+            if (dataToExport.length === 0) {
+                alert('لا توجد بيانات متاحة للتصدير حالياً.');
                 return;
             }
 
             const tbody = document.getElementById('pdfTableBody');
-            tbody.innerHTML = currentFilteredProviders.map(item => `
+            tbody.innerHTML = dataToExport.map(item => `
                 <tr>
                     <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold;">${item.name || ''}</td>
                     <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.section || ''}</td>
@@ -735,8 +740,7 @@
                 element.style.display = 'none';
             });
         }
-
-        searchInput.addEventListener('input', filterData);
+		searchInput.addEventListener('input', filterData);
         cityFilter.addEventListener('change', filterData);
         sectionFilter.addEventListener('change', filterData);
         categoryFilter.addEventListener('change', filterData);
