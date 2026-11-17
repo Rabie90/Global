@@ -6,12 +6,8 @@
     <title>دليل الشبكة الطبية - الشركة العالمية للتأمين الصحي</title>
     <!-- خط تجوال العربي الاحترافي -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-    <!-- مكتبة SheetJS لقراءة ملفات الإكسل -->
+    <!-- مكتبة SheetJS لقراءة وتصدير ملفات الإكسل -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- مكتبة jsPDF لتوليد ملفات PDF بكفاءة عالية للبيانات الضخمة -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- مكتبة jsPDF-AutoTable لجداول الـ PDF المنظمة -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/plugin.min.js"></script>
     <style>
         :root {
             --primary: #090979;
@@ -198,8 +194,8 @@
             border: 1px solid rgba(5, 150, 105, 0.2);
         }
 
-        .btn-pdf {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        .btn-excel {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
             color: white;
             border: none;
             padding: 0.65rem 1.35rem;
@@ -210,13 +206,13 @@
             display: inline-flex;
             align-items: center;
             gap: 0.6rem;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.25);
             transition: all 0.3s;
         }
 
-        .btn-pdf:hover {
+        .btn-excel:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.35);
         }
 
         .grid {
@@ -397,9 +393,9 @@
         <div class="results-bar">
             <div class="results-count">الاجمالي: <span id="totalCount">0</span></div>
             <div class="bar-actions">
-                <button class="btn-pdf" onclick="exportToPDF()">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    انقر هنا لتحميل دليل الشبكة الطبيه
+                <button class="btn-excel" onclick="exportToExcel()">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    انقر هنا لتحميل دليل الشبكة كملف Excel
                 </button>
             </div>
         </div>
@@ -465,7 +461,6 @@
                     syncStatus.innerHTML = "🟢 متزامن بنجاح (" + allProviders.length + " جهة)";
                     populateFilters(allProviders);
                     
-                    // إسناد البيانات الكاملة للنتائج المفلترة لضمان عمل PDF فور فتح الصفحة
                     currentFilteredProviders = allProviders;
                     renderCards(allProviders);
                 })
@@ -508,7 +503,6 @@
                 return;
             }
 
-            // عرض أول 50 بطاقة فقط في الواجهة لضمان سرعة تصفح فائقة، بينما زر PDF سيصدر الكل
             const displayData = data.slice(0, 50);
 
             cardsGrid.innerHTML = displayData.map(item => {
@@ -579,7 +573,8 @@
             renderCards(currentFilteredProviders);
         }
 
-        function exportToPDF() {
+        // دالة تصدير البيانات المفلترة أو الكاملة كملف Excel رسمي فوراً وبسرعة فائقة
+        function exportToExcel() {
             const dataToExport = (currentFilteredProviders && currentFilteredProviders.length > 0) 
                 ? currentFilteredProviders 
                 : allProviders;
@@ -589,40 +584,22 @@
                 return;
             }
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4');
+            // تجهيز البيانات بالأسماء العربية المناسبة للأعمدة
+            const formattedData = dataToExport.map(item => ({
+                "اسم الجهة الطبية": item.name,
+                "القسم": item.section,
+                "المحافظة": item.city,
+                "العنوان": item.address,
+                "الهاتف": item.phone,
+                "التصنيف": item.category
+            }));
 
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(15);
-            doc.setTextColor(4, 120, 87);
-            doc.text("Global Health Insurance - Medical Network Guide", 14, 15);
+            const worksheet = XLSX.utils.json_to_sheet(formattedData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "الشبكة الطبية");
 
-            doc.setFontSize(10);
-            doc.setTextColor(100, 116, 139);
-            doc.text("الشركة العالمية للتأمين الصحي - دليل الشبكة الطبية المعتمدة", 14, 21);
-            doc.text("تاريخ التقرير: " + new Date().toLocaleDateString('ar-SA'), 14, 27);
-
-            const tableHeaders = [["اسم الجهة الطبية", "القسم", "المحافظة", "العنوان", "الهاتف", "التصنيف"]];
-            const tableData = dataToExport.map(item => [
-                item.name,
-                item.section,
-                item.city,
-                item.address,
-                item.phone,
-                item.category
-            ]);
-
-            doc.autoTable({
-                head: tableHeaders,
-                body: tableData,
-                startY: 32,
-                styles: { font: "helvetica", fontSize: 8, cellPadding: 3, halign: 'right' },
-                headStyles: { fillColor: [4, 120, 87], textColor: [255, 255, 255], fontStyle: 'bold' },
-                alternateRowStyles: { fillColor: [241, 245, 249] },
-                margin: { top: 32, right: 14, bottom: 14, left: 14 }
-            });
-
-            doc.save('دليل_الشبكة_الطبية_الشركة_العالمية.pdf');
+            // تحميل الملف باسم الشركة
+            XLSX.writeFile(workbook, "دليل_الشبكة_الطبية_الشركة_العالمية.xlsx");
         }
 
         searchInput.addEventListener('input', filterData);
