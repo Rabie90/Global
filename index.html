@@ -590,20 +590,21 @@
 
                     syncStatus.innerHTML = "🟢 متزامن بنجاح";
                     populateFilters(allProviders);
-                    filterData();
+                    
+                    // هذا السطر هو المهم: يقوم بتهيئة البيانات وتجهيزها للتصدير والعرص فور فتح الصفحة
+                    filterData(); 
                 })
                 .catch(error => {
                     console.error(error);
                     syncStatus.innerHTML = "🔴 خطأ في التحميل";
                     cardsGrid.innerHTML = `
                         <div class="state-box">
-                            <h3 style="color:#dc2626;">تعذر العثور على ملف </h3>
-                            <p>تأكد من أن ملف  باسم <strong>"${EXCEL_FILE_PATH}"</strong> ومرفوع في نفس المجلد مع هذا الملف على GitHub.</p>
+                            <h3 style="color:#dc2626;">تعذر العثور على ملف</h3>
+                            <p>تأكد من أن ملف باسم <strong>"${EXCEL_FILE_PATH}"</strong> ومرفوع في نفس المجلد مع هذا الملف على GitHub.</p>
                         </div>
                     `;
                 });
         }
-
         function populateFilters(data) {
             cityFilter.innerHTML = '<option value="">جميع المحافظات</option>';
             sectionFilter.innerHTML = '<option value="">جميع الأقسام</option>';
