@@ -8,9 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <!-- مكتبة SheetJS لقراءة ملفات الإكسل -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- مكتبة pdfmake لتوليد ملفات الـ PDF الكبيرة والضخمة باحترافية وسرعة فائقة -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <!-- مكتبة html2pdf لتصدير الملفات بصيغة PDF مع دعم كامل للغة العربية -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
             --primary: #090979;
@@ -329,6 +328,17 @@
             color: var(--text-muted);
         }
 
+        /* تنسيق جدول الـ PDF المخفي لدعم اللغة العربية والخطوط باحترافية */
+        #pdfExportTemplate {
+            display: none;
+            direction: rtl;
+            font-family: 'Tajawal', sans-serif;
+            background: white;
+            padding: 20px;
+            color: #0f172a;
+            width: 1100px;
+        }
+
         @media (max-width: 1024px) {
             .search-panel {
                 grid-template-columns: 1fr 1fr;
@@ -410,6 +420,30 @@
             </div>
         </section>
     </main>
+
+    <!-- قالب الـ PDF المخصص لعرض الجدول العربي بالكامل ودعمه عبر خط Tajawal -->
+    <div id="pdfExportTemplate">
+        <div style="text-align: center; border-bottom: 3px solid #047857; padding-bottom: 15px; margin-bottom: 20px;">
+            <h2 style="color: #047857; font-size: 24px; margin-bottom: 5px;">الشركة العالمية للتأمين الصحي</h2>
+            <p style="color: #059669; font-size: 16px; font-weight: bold;">دليل الشبكة الطبية المعتمدة</p>
+            <p style="color: #64748b; font-size: 12px; margin-top: 5px;" id="pdfExportDate"></p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: right;">
+            <thead>
+                <tr style="background-color: #047857; color: white;">
+                    <th style="padding: 10px; border: 1px solid #cbd5e1;">اسم الجهة الطبية</th>
+                    <th style="padding: 10px; border: 1px solid #cbd5e1;">القسم</th>
+                    <th style="padding: 10px; border: 1px solid #cbd5e1;">المحافظة</th>
+                    <th style="padding: 10px; border: 1px solid #cbd5e1;">العنوان</th>
+                    <th style="padding: 10px; border: 1px solid #cbd5e1;">الهاتف</th>
+                    <th style="padding: 10px; border: 1px solid #cbd5e1;">التصنيف</th>
+                </tr>
+            </thead>
+            <tbody id="pdfTableBody">
+                <!-- يتم تعبئتها ديناميكياً -->
+            </tbody>
+        </table>
+    </div>
 
     <script>
         const EXCEL_FILE_PATH = "data.xlsx";
@@ -540,7 +574,7 @@
                             </div>
                             ${phone ? `
                             <div class="info-row">
-                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.275a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                                 <span dir="ltr">${phone}</span>
                             </div>` : ''}
                         </div>
@@ -576,7 +610,7 @@
             renderCards(currentFilteredProviders);
         }
 
-        // دالة توليد ملف الـ PDF احترافياً وبدون أخطاء للبيانات الضخمة باستخدام pdfmake
+        // دالة تصدير ملف الـ PDF مع دعم كامل للغة العربية والخط العربي عبر html2pdf
         function exportToPDF() {
             const dataToExport = (currentFilteredProviders && currentFilteredProviders.length > 0) 
                 ? currentFilteredProviders 
@@ -587,66 +621,39 @@
                 return;
             }
 
-            // تجهيز صفوف الجدول (مقلوبة المعکوسة لكي تظهر النصوص العربية بشكل سليم تماماً)
-            const bodyRows = [
-                [
-                    { text: 'التصنيف', style: 'tableHeader' },
-                    { text: 'الهاتف', style: 'tableHeader' },
-                    { text: 'العنوان', style: 'tableHeader' },
-                    { text: 'المحافظة', style: 'tableHeader' },
-                    { text: 'القسم', style: 'tableHeader' },
-                    { text: 'اسم الجهة الطبية', style: 'tableHeader' }
-                ]
-            ];
+            const tbody = document.getElementById('pdfTableBody');
+            tbody.innerHTML = dataToExport.map(item => `
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold;">${item.name || ''}</td>
+                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.section || ''}</td>
+                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.city || ''}</td>
+                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.address || ''}</td>
+                    <td style="padding: 8px; border: 1px solid #cbd5e1;" dir="ltr">${item.phone || ''}</td>
+                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.category || ''}</td>
+                </tr>
+            `).join('');
 
-            dataToExport.forEach(item => {
-                bodyRows.push([
-                    { text: item.category || '', style: 'tableCell' },
-                    { text: item.phone || '', style: 'tableCell', alignment: 'left' },
-                    { text: item.address || '', style: 'tableCell' },
-                    { text: item.city || '', style: 'tableCell' },
-                    { text: item.section || '', style: 'tableCell' },
-                    { text: item.name || '', style: 'tableCellBold' }
-                ]);
-            });
+            document.getElementById('pdfExportDate').textContent = 'تاريخ التقرير: ' + new Date().toLocaleDateString('ar-SA');
 
-            const docDefinition = {
-                pageOrientation: 'landscape',
-                pageSize: 'A4',
-                defaultStyle: {
-                    font: 'Roboto' // الخط الأساسي الداعم للملفات الكبيرة
-                },
-                content: [
-                    { text: 'الشركة العالمية للتأمين الصحي', fontSize: 18, bold: true, alignment: 'right', color: '#047857', margin: [0, 0, 0, 5] },
-                    { text: 'دليل الشبكة الطبية المعتمدة', fontSize: 14, bold: true, alignment: 'right', color: '#059669', margin: [0, 0, 0, 15] },
-                    {
-                        table: {
-                            headerRows: 1,
-                            widths: ['12%', '15%', '28%', '15%', '15%', '15%'],
-                            body: bodyRows
-                        },
-                        layout: {
-                            fillColor: function (rowIndex) {
-                                return (rowIndex === 0) ? '#047857' : (rowIndex % 2 === 0 ? '#f1f5f9' : null);
-                            },
-                            hLineWidth: function () { return 0.5; },
-                            vLineWidth: function () { return 0.5; },
-                            hLineColor: function () { return '#cbd5e1'; },
-                            vLineColor: function () { return '#cbd5e1'; }
-                        }
-                    }
-                ],
-                styles: {
-                    tableHeader: { bold: true, fontSize: 10, color: 'white', alignment: 'center', margin: [4, 6, 4, 6] },
-                    tableCell: { fontSize: 8, alignment: 'right', margin: [4, 4, 4, 4] },
-                    tableCellBold: { bold: true, fontSize: 8, alignment: 'right', margin: [4, 4, 4, 4] }
-                },
-                footer: function(currentPage, pageCount) {
-                    return { text: 'صفحة ' + currentPage.toString() + ' من ' + pageCount.toString(), alignment: 'center', fontSize: 9, margin: [0, 10, 0, 0] };
-                }
+            const element = document.getElementById('pdfExportTemplate');
+            element.style.display = 'block';
+
+            const opt = {
+                margin:       10,
+                filename:     'دليل_الشبكة_الطبية_الشركة_العالمية.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
             };
 
-            pdfMake.createPdf(docDefinition).download('دليل_الشبكة_الطبية_الشركة_العالمية.pdf');
+            // تشغيل مكتبة التحويل مع إخفاء القالب عند الانتهاء
+            html2pdf().from(element).set(opt).save().then(() => {
+                element.style.display = 'none';
+            }).catch(err => {
+                console.error(err);
+                element.style.display = 'none';
+                alert('حدث خطأ أثناء تصدير الملف.');
+            });
         }
 
         searchInput.addEventListener('input', filterData);
