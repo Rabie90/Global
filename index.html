@@ -8,8 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <!-- مكتبة SheetJS لقراءة ملفات الإكسل -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- مكتبة html2pdf لتصدير الملفات بصيغة PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- مكتبة jsPDF لتوليد ملفات PDF بكفاءة عالية للبيانات الضخمة -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- مكتبة jsPDF-AutoTable لجداول الـ PDF المنظمة -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/plugin.min.js"></script>
     <style>
         :root {
             --primary: #090979;
@@ -209,6 +211,12 @@
             align-items: center;
             gap: 0.6rem;
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
+            transition: all 0.3s;
+        }
+
+        .btn-pdf:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
         }
 
         .grid {
@@ -322,13 +330,17 @@
             color: var(--text-muted);
         }
 
-        #pdfExportTemplate {
-            display: none;
-            direction: rtl;
-            font-family: 'Tajawal', sans-serif;
-            background: white;
-            padding: 30px;
-            color: #0f172a;
+        @media (max-width: 1024px) {
+            .search-panel {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .search-panel {
+                grid-template-columns: 1fr;
+                margin-top: -2rem;
+            }
         }
     </style>
 </head>
@@ -400,27 +412,6 @@
         </section>
     </main>
 
-    <div id="pdfExportTemplate">
-        <div style="text-align: center; border-bottom: 3px solid #059669; padding-bottom: 15px; margin-bottom: 20px;">
-            <h2 style="color: #047857; font-size: 22px; margin-bottom: 3px;">الشركة العالمية للتأمين الصحي</h2>
-            <p style="color: #059669; font-size: 14px; font-weight: bold; margin-bottom: 5px;">دليل الشبكة الطبية المعتمدة</p>
-            <p style="color: #64748b; font-size: 11px; margin-top: 5px;" id="pdfExportDate"></p>
-        </div>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;">
-            <thead>
-                <tr style="background-color: #047857; color: white;">
-                    <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">اسم الجهة الطبية</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">القسم</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">المحافظة</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">العنوان</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">الهاتف</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">التصنيف</th>
-                </tr>
-            </thead>
-            <tbody id="pdfTableBody"></tbody>
-        </table>
-    </div>
-
     <script>
         const EXCEL_FILE_PATH = "data.xlsx";
 
@@ -474,7 +465,7 @@
                     syncStatus.innerHTML = "🟢 متزامن بنجاح";
                     populateFilters(allProviders);
                     
-                    // تعبئة النتائج المفلترة بالبيانات الكاملة مباشرة عند التحميل لضمان عمل PDF فوراً
+                    // تهيئة النتائج المفلترة لتشمل كل البيانات منذ البداية
                     currentFilteredProviders = allProviders;
                     renderCards(allProviders);
                 })
@@ -585,8 +576,8 @@
             renderCards(currentFilteredProviders);
         }
 
+        // دالة توليد وتنزيل ملف PDF المخصصة للبيانات الكبيرة الضخمة
         function exportToPDF() {
-            // ضمان استخدام البيانات المفلترة حالياً أو كل البيانات إذا لم يتم الفلترة
             const dataToExport = (currentFilteredProviders && currentFilteredProviders.length > 0) 
                 ? currentFilteredProviders 
                 : allProviders;
@@ -596,34 +587,44 @@
                 return;
             }
 
-            const tbody = document.getElementById('pdfTableBody');
-            tbody.innerHTML = dataToExport.map(item => `
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold;">${item.name || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.section || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.city || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.address || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1;" dir="ltr">${item.phone || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.category || ''}</td>
-                </tr>
-            `).join('');
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4'); // جدول عريض (Landscape)
 
-            document.getElementById('pdfExportDate').textContent = 'تاريخ التقرير: ' + new Date().toLocaleDateString('ar-SA');
+            // عنوان التقرير
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.setTextColor(4, 120, 87);
+            doc.text("Global Health Insurance - Medical Network Guide", 14, 15);
 
-            const element = document.getElementById('pdfExportTemplate');
-            element.style.display = 'block';
+            doc.setFontSize(11);
+            doc.setTextColor(100, 116, 139);
+            doc.text("الشركة العالمية للتأمين الصحي - دليل الشبكة الطبية المعتمدة", 14, 22);
+            doc.text("تاريخ التقرير: " + new Date().toLocaleDateString('ar-SA'), 14, 28);
 
-            const opt = {
-                margin:       10,
-                filename:     'دليل_الشبكة_الطبية_الشركة_العالمية.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-            };
+            // إعداد أعمدة الجدول وبياناته
+            const tableHeaders = [["اسم الجهة الطبية", "القسم", "المحافظة", "العنوان", "الهاتف", "التصنيف"]];
+            const tableData = dataToExport.map(item => [
+                item.name || '',
+                item.section || '',
+                item.city || '',
+                item.address || '',
+                item.phone || '',
+                item.category || ''
+            ]);
 
-            html2pdf().from(element).set(opt).save().then(() => {
-                element.style.display = 'none';
+            // رسم الجدول باحترافية وسرعة فائقة
+            doc.autoTable({
+                head: tableHeaders,
+                body: tableData,
+                startY: 34,
+                styles: { font: "helvetica", fontSize: 9, cellPadding: 4, halign: 'right' },
+                headStyles: { fillColor: [4, 120, 87], textColor: [255, 255, 255], fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [241, 245, 249] },
+                margin: { top: 34, right: 14, bottom: 14, left: 14 }
             });
+
+            // حفظ الملف وتنزيله فوراً
+            doc.save('دليل_الشبكة_الطبية_الشركة_العالمية.pdf');
         }
 
         searchInput.addEventListener('input', filterData);
