@@ -700,10 +700,7 @@
         }
 
         function exportToPDF() {
-            if (currentFilteredProviders.length !== 0) {
-                alert('لا توجد بيانات لتنزيلها حالياً.');
-                return;
-            }
+            
 
             const tbody = document.getElementById('pdfTableBody');
             tbody.innerHTML = currentFilteredProviders.map(item => `
