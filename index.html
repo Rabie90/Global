@@ -8,8 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <!-- مكتبة SheetJS لقراءة ملفات الإكسل -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- مكتبة html2pdf لتصدير الملفات بصيغة PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- مكتبة jsPDF لتوليد ملفات PDF بكفاءة عالية للبيانات الضخمة -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- مكتبة jsPDF-AutoTable لجداول الـ PDF المنظمة -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/plugin.min.js"></script>
     <style>
         :root {
             --primary: #090979;
@@ -42,7 +44,6 @@
             min-height: 100vh;
         }
 
-        /* الترويسة الفاخرة */
         header {
             background: linear-gradient(135deg, #ffffff 0%, #f1f2f3 50%, #f3f3f3 100%);
             color: #000;
@@ -53,18 +54,6 @@
             box-shadow: 0 10px 30px rgba(2, 44, 34, 0.2);
         }
 
-        header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        /* تنسيق قسم الشعار والهوية */
         .brand-container {
             display: inline-flex;
             align-items: center;
@@ -77,7 +66,7 @@
             margin-bottom: 1.5rem;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
             text-align: right;
-			color: #000;
+            color: #000;
         }
 
         .brand-logo {
@@ -108,13 +97,6 @@
             margin-bottom: 0.5rem;
             letter-spacing: -0.5px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            max-width: 650px;
-            margin: 0 auto 1.75rem;
         }
 
         .header-actions {
@@ -156,7 +138,6 @@
             padding: 0 1.5rem;
         }
 
-        /* لوحة البحث والفلترة العائمة */
         .search-panel {
             background: var(--card-bg);
             border-radius: 24px;
@@ -181,7 +162,6 @@
             font-weight: 800;
             color: var(--text-muted);
             margin-bottom: 0.5rem;
-            letter-spacing: 0.3px;
         }
 
         .input-group input,
@@ -193,19 +173,10 @@
             font-size: 1rem;
             color: var(--text-main);
             background-color: #f8fafc;
-            transition: all 0.25s ease;
             outline: none;
             font-weight: 600;
         }
 
-        .input-group input:focus,
-        .input-group select:focus {
-            border-color: var(--primary);
-            background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.12);
-        }
-
-        /* شريط النتائج والإحصائيات */
         .results-bar {
             display: flex;
             justify-content: space-between;
@@ -227,12 +198,6 @@
             border: 1px solid rgba(5, 150, 105, 0.2);
         }
 
-        .bar-actions {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
         .btn-pdf {
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: white;
@@ -245,8 +210,8 @@
             display: inline-flex;
             align-items: center;
             gap: 0.6rem;
-            transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
+            transition: all 0.3s;
         }
 
         .btn-pdf:hover {
@@ -254,7 +219,6 @@
             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
         }
 
-        /* شبكة البطاقات */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -270,32 +234,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
             box-shadow: var(--shadow-sm);
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 6px;
-            height: 100%;
-            background: linear-gradient(to bottom, var(--primary), var(--primary-light));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-lg);
-            border-color: var(--primary-light);
-        }
-
-        .card:hover::before {
-            opacity: 1;
         }
 
         .card-header {
@@ -313,7 +252,6 @@
             border-radius: 30px;
             font-size: 0.8rem;
             font-weight: 800;
-            border: 1px solid rgba(5, 150, 105, 0.15);
         }
 
         .zone-badge {
@@ -330,7 +268,6 @@
             font-weight: 800;
             color: var(--secondary);
             margin-bottom: 1.1rem;
-            line-height: 1.4;
         }
 
         .info-row {
@@ -370,29 +307,17 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            transition: all 0.25s ease;
         }
 
         .btn-call {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
-            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
-        }
-
-        .btn-call:hover {
-            opacity: 0.92;
-            transform: translateY(-1px);
         }
 
         .btn-map {
             background: #f8fafc;
             color: var(--secondary);
             border: 1px solid var(--border);
-        }
-
-        .btn-map:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
         }
 
         .state-box {
@@ -403,23 +328,6 @@
             border-radius: 24px;
             border: 2px dashed var(--border);
             color: var(--text-muted);
-        }
-
-        .state-box h3 {
-            color: var(--secondary);
-            margin-bottom: 0.75rem;
-            font-size: 1.6rem;
-            font-weight: 800;
-        }
-
-        /* تنسيق قالب تقرير الـ PDF المخفي */
-        #pdfExportTemplate {
-            display: none;
-            direction: rtl;
-            font-family: 'Tajawal', sans-serif;
-            background: white;
-            padding: 30px;
-            color: #0f172a;
         }
 
         @media (max-width: 1024px) {
@@ -433,9 +341,6 @@
                 grid-template-columns: 1fr;
                 margin-top: -2rem;
             }
-            header h1 {
-                font-size: 2rem;
-            }
         }
     </style>
 </head>
@@ -443,7 +348,6 @@
 
     <header>
         <div class="container">
-            <!-- شعار وعنوان الشركة -->
             <div class="brand-container">
                 <img src="logo.jpg" alt="شعار الشركة العالمية للتأمين الصحي" class="brand-logo" onerror="this.style.display='none'">
                 <div class="brand-text">
@@ -453,7 +357,6 @@
             </div>
 
             <h1>دليل الشبكة الطبية المعتمدة</h1>
-           <!--  <p>منصة رقمية متطورة لاستعراض والبحث في شبكة الرعاية الصحية والجهات الطبية المعتمدة</p> -->
             
             <div class="header-actions">
                 <button class="action-chip" onclick="loadExcelFile()">
@@ -466,7 +369,6 @@
     </header>
 
     <main class="container">
-        <!-- لوحة البحث والفلترة -->
         <section class="search-panel">
             <div class="input-group">
                 <label for="searchInput">بحث بالاسم أو العنوان</label>
@@ -492,18 +394,16 @@
             </div>
         </section>
 
-        <!-- شريط النتائج وأزرار التصدير -->
         <div class="results-bar">
-            <div class="results-count">الاجمالي:<span id="totalCount">0</span></div>
+            <div class="results-count">الاجمالي: <span id="totalCount">0</span></div>
             <div class="bar-actions">
                 <button class="btn-pdf" onclick="exportToPDF()">
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                  انقر هنا لتحميل دليل الشبكة الطبيه
+                    انقر هنا لتحميل دليل الشبكة الطبيه
                 </button>
             </div>
         </div>
 
-        <!-- شبكة عرض البطاقات -->
         <section class="grid" id="cardsGrid">
             <div class="state-box">
                 <h3>جاري تحميل البيانات...</h3>
@@ -511,30 +411,6 @@
             </div>
         </section>
     </main>
-
-    <!-- قالب تقرير الـ PDF المنسق -->
-    <div id="pdfExportTemplate">
-        <div style="text-align: center; border-bottom: 3px solid #059669; padding-bottom: 15px; margin-bottom: 20px;">
-            <h2 style="color: #047857; font-size: 22px; margin-bottom: 3px;">الشركة العالمية للتأمين الصحي</h2>
-            <p style="color: #059669; font-size: 14px; font-weight: bold; margin-bottom: 5px;">دليل الشبكة الطبية المعتمدة</p>
-            <p style="color: #64748b; font-size: 11px; margin-top: 5px;" id="pdfExportDate"></p>
-        </div>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;">
-            <thead>
-                <tr style="background-color: #047857; color: white;">
-                    <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">اسم الجهة الطبية</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">القسم</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">المحافظة</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">العنوان</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">الهاتف</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">التصنيف</th>
-                </tr>
-            </thead>
-            <tbody id="pdfTableBody">
-                <!-- يتم تعبئتها برمجياً -->
-            </tbody>
-        </table>
-    </div>
 
     <script>
         const EXCEL_FILE_PATH = "data.xlsx";
@@ -556,13 +432,13 @@
                 row[key.trim()] = rawRow[key];
             }
             return {
-                name: row['اسم الشبكه'] || row['اسم الشبكة'] || row['الاسم'] || row['name'] || '',
-                address: row['العنوان'] || row['address'] || '',
-                phone: String(row['الهاتف'] || row['رقم الهاتف'] || row['phone'] || ''),
-                city: row['المحافظة'] || row['المدينة'] || row['city'] || '',
-                section: row['القسم'] || row['section'] || '',
-                category: row['التصنيف'] || row['category'] || '',
-                map_url: row['الخريطة'] || row['map_url'] || ''
+                name: (row['اسم الشبكه'] !== undefined && row['اسم الشبكه'] !== null) ? String(row['اسم الشبكه']).trim() : '',
+                address: (row['العنوان'] !== undefined && row['العنوان'] !== null) ? String(row['العنوان']).trim() : '',
+                phone: (row['الهاتف'] !== undefined && row['الهاتف'] !== null) ? String(row['الهاتف']).trim() : '',
+                city: (row['المحافظة'] !== undefined && row['المحافظة'] !== null) ? String(row['المحافظة']).trim() : '',
+                section: (row['القسم'] !== undefined && row['القسم'] !== null) ? String(row['القسم']).trim() : '',
+                category: (row['التصنيف'] !== undefined && row['التصنيف'] !== null) ? String(row['التصنيف']).trim() : '',
+                map_url: (row['الخريطة'] !== undefined && row['الخريطة'] !== null) ? String(row['الخريطة']).trim() : ''
             };
         }
 
@@ -572,9 +448,7 @@
 
             fetch(fileUrl)
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error("تعذر الوصول إلى ملف الإكسل.");
-                    }
+                    if (!response.ok) throw new Error("تعذر الوصول إلى ملف الإكسل.");
                     return response.arrayBuffer();
                 })
                 .then(arrayBuffer => {
@@ -586,19 +460,22 @@
 
                     allProviders = jsonData
                         .map(normalizeRow)
-                        .filter(item => item.name && item.name.toString().trim() !== '');
+                        .filter(item => item.name !== '');
 
-                    syncStatus.innerHTML = "🟢 متزامن بنجاح";
+                    syncStatus.innerHTML = "🟢 متزامن بنجاح (" + allProviders.length + " جهة)";
                     populateFilters(allProviders);
-                    filterData();
+                    
+                    // إسناد البيانات الكاملة للنتائج المفلترة لضمان عمل PDF فور فتح الصفحة
+                    currentFilteredProviders = allProviders;
+                    renderCards(allProviders);
                 })
                 .catch(error => {
                     console.error(error);
                     syncStatus.innerHTML = "🔴 خطأ في التحميل";
                     cardsGrid.innerHTML = `
                         <div class="state-box">
-                            <h3 style="color:#dc2626;">تعذر العثور على ملف </h3>
-                            <p>تأكد من أن ملف  باسم <strong>"${EXCEL_FILE_PATH}"</strong> ومرفوع في نفس المجلد مع هذا الملف على GitHub.</p>
+                            <h3 style="color:#dc2626;">تعذر العثور على ملف البيانات</h3>
+                            <p>تأكد من أن الملف باسم <strong>"${EXCEL_FILE_PATH}"</strong> ومرفوع في نفس المجلد على GitHub.</p>
                         </div>
                     `;
                 });
@@ -609,9 +486,9 @@
             sectionFilter.innerHTML = '<option value="">جميع الأقسام</option>';
             categoryFilter.innerHTML = '<option value="">جميع التصنيفات</option>';
 
-            const cities = [...new Set(data.map(item => item.city?.toString().trim()).filter(Boolean))].sort();
-            const sections = [...new Set(data.map(item => item.section?.toString().trim()).filter(Boolean))].sort();
-            const categories = [...new Set(data.map(item => item.category?.toString().trim()).filter(Boolean))].sort();
+            const cities = [...new Set(data.map(item => item.city).filter(Boolean))].sort();
+            const sections = [...new Set(data.map(item => item.section).filter(Boolean))].sort();
+            const categories = [...new Set(data.map(item => item.category).filter(Boolean))].sort();
 
             cities.forEach(c => cityFilter.add(new Option(c, c)));
             sections.forEach(s => sectionFilter.add(new Option(s, s)));
@@ -631,14 +508,17 @@
                 return;
             }
 
-            cardsGrid.innerHTML = data.map(item => {
+            // عرض أول 50 بطاقة فقط في الواجهة لضمان سرعة تصفح فائقة، بينما زر PDF سيصدر الكل
+            const displayData = data.slice(0, 50);
+
+            cardsGrid.innerHTML = displayData.map(item => {
                 const name = item.name || 'غير محدد';
                 const section = item.section || 'جهة طبية';
                 const category = item.category || '';
                 const city = item.city || '';
                 const address = item.address || 'العنوان غير متوفر';
-                const phone = item.phone ? item.phone.toString().trim() : '';
-                const mapUrl = item.map_url && item.map_url.trim() !== '' 
+                const phone = item.phone || '';
+                const mapUrl = item.map_url !== '' 
                     ? item.map_url 
                     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + ' ' + city)}`;
 
@@ -685,13 +565,13 @@
 
             currentFilteredProviders = allProviders.filter(item => {
                 const matchText = !query || 
-                    (item.name && item.name.toLowerCase().includes(query)) ||
-                    (item.address && item.address.toLowerCase().includes(query)) ||
-                    (item.phone && item.phone.includes(query));
+                    item.name.toLowerCase().includes(query) ||
+                    item.address.toLowerCase().includes(query) ||
+                    item.phone.includes(query);
 
-                const matchCity = !selectedCity || (item.city && item.city.toString().trim() === selectedCity);
-                const matchSection = !selectedSection || (item.section && item.section.toString().trim() === selectedSection);
-                const matchCat = !selectedCat || (item.category && item.category.toString().trim() === selectedCat);
+                const matchCity = !selectedCity || item.city === selectedCity;
+                const matchSection = !selectedSection || item.section === selectedSection;
+                const matchCat = !selectedCat || item.category === selectedCat;
 
                 return matchText && matchCity && matchSection && matchCat;
             });
@@ -700,39 +580,49 @@
         }
 
         function exportToPDF() {
-            if (currentFilteredProviders.length === 0) {
-                alert('لا توجد بيانات لتنزيلها حالياً.');
+            const dataToExport = (currentFilteredProviders && currentFilteredProviders.length > 0) 
+                ? currentFilteredProviders 
+                : allProviders;
+
+            if (dataToExport.length === 0) {
+                alert('لا توجد بيانات متاحة للتصدير حالياً.');
                 return;
             }
 
-            const tbody = document.getElementById('pdfTableBody');
-            tbody.innerHTML = currentFilteredProviders.map(item => `
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold;">${item.name || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.section || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.city || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.address || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1;" dir="ltr">${item.phone || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1;">${item.category || ''}</td>
-                </tr>
-            `).join('');
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
 
-            document.getElementById('pdfExportDate').textContent = 'تاريخ التقرير: ' + new Date().toLocaleDateString('ar-SA');
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(15);
+            doc.setTextColor(4, 120, 87);
+            doc.text("Global Health Insurance - Medical Network Guide", 14, 15);
 
-            const element = document.getElementById('pdfExportTemplate');
-            element.style.display = 'block';
+            doc.setFontSize(10);
+            doc.setTextColor(100, 116, 139);
+            doc.text("الشركة العالمية للتأمين الصحي - دليل الشبكة الطبية المعتمدة", 14, 21);
+            doc.text("تاريخ التقرير: " + new Date().toLocaleDateString('ar-SA'), 14, 27);
 
-            const opt = {
-                margin:       10,
-                filename:     'دليل_الشبكة_الطبية_الشركة_العالمية.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-            };
+            const tableHeaders = [["اسم الجهة الطبية", "القسم", "المحافظة", "العنوان", "الهاتف", "التصنيف"]];
+            const tableData = dataToExport.map(item => [
+                item.name,
+                item.section,
+                item.city,
+                item.address,
+                item.phone,
+                item.category
+            ]);
 
-            html2pdf().from(element).set(opt).save().then(() => {
-                element.style.display = 'none';
+            doc.autoTable({
+                head: tableHeaders,
+                body: tableData,
+                startY: 32,
+                styles: { font: "helvetica", fontSize: 8, cellPadding: 3, halign: 'right' },
+                headStyles: { fillColor: [4, 120, 87], textColor: [255, 255, 255], fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [241, 245, 249] },
+                margin: { top: 32, right: 14, bottom: 14, left: 14 }
             });
+
+            doc.save('دليل_الشبكة_الطبية_الشركة_العالمية.pdf');
         }
 
         searchInput.addEventListener('input', filterData);
